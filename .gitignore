@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.venv/
+*.egg-info/
+dist/
+.env
+backend/.env
+
+# Chroma
+chroma_db/
+
+# Node
+node_modules/
+.next/
+.env.local
+.env.example
+
+
+# OS
+.DS_Store
+Thumbs.db
