@@ -2,9 +2,7 @@ from pydantic import BaseModel, field_validator
 from typing import Optional, List, Any
 
 
-# --------------------------------------------------------------------------- #
-# YouTube extraction output — mirrors YouTubeService dataclasses
-# --------------------------------------------------------------------------- #
+# YouTube extraction output
 
 class TranscriptSegmentSchema(BaseModel):
     text: str
@@ -23,9 +21,9 @@ class YouTubeMetadataSchema(BaseModel):
     title: str
     creator: str
     upload_date: str
-    duration: int              # seconds
+    duration: int
     views: int
-    likes: Optional[int]       # None when YouTube hides the count
+    likes: Optional[int]
     description: str
     hashtags: List[str]
     thumbnail_url: str
@@ -36,9 +34,31 @@ class YouTubeVideoSchema(BaseModel):
     transcript: TranscriptSchema
 
 
-# --------------------------------------------------------------------------- #
-# Shared engagement metadata (used in API responses for both sources)
-# --------------------------------------------------------------------------- #
+# Instagram extraction output
+
+class InstagramMetadataSchema(BaseModel):
+    shortcode: str
+    reel_url: str
+    creator_username: str
+    creator_full_name: str
+    followers: Optional[int]
+    caption: str
+    hashtags: List[str]
+    upload_date: str
+    views: Optional[int]
+    likes: Optional[int]
+    comments: Optional[int]
+    duration: Optional[int]
+    thumbnail_url: str
+    engagement_rate: Optional[float]
+
+
+class InstagramReelSchema(BaseModel):
+    metadata: InstagramMetadataSchema
+    caption: str
+
+
+# Shared engagement metadata (API responses)
 
 class VideoMetadata(BaseModel):
     title: Optional[str] = None
@@ -48,15 +68,13 @@ class VideoMetadata(BaseModel):
     comments: Optional[int] = None
     followers: Optional[int] = None
     hashtags: List[str] = []
-    duration: Optional[int] = None          # seconds
-    upload_date: Optional[str] = None       # YYYY-MM-DD
-    engagement_rate: Optional[float] = None # percentage
+    duration: Optional[int] = None
+    upload_date: Optional[str] = None
+    engagement_rate: Optional[float] = None
     thumbnail_url: Optional[str] = None
 
 
-# --------------------------------------------------------------------------- #
 # /analyze
-# --------------------------------------------------------------------------- #
 
 class AnalyzeRequest(BaseModel):
     youtube_url: str
@@ -78,8 +96,7 @@ class AnalyzeRequest(BaseModel):
 
 
 class VideoInput(BaseModel):
-    """Normalised single-source video ready for embedding."""
-    source: str          # "youtube" | "instagram"
+    source: str
     url: str
     transcript: str
     metadata: VideoMetadata
@@ -91,16 +108,7 @@ class AnalyzeResponse(BaseModel):
     instagram: VideoMetadata
 
 
-# --------------------------------------------------------------------------- #
-# /chat
-# --------------------------------------------------------------------------- #
-
-class Citation(BaseModel):
-    source: str
-    title: Optional[str] = None
-    excerpt: str
-    relevance_score: float
-
+# /chat — streaming (routes.py) uses these for validation
 
 class ChatRequest(BaseModel):
     session_id: str
@@ -109,12 +117,36 @@ class ChatRequest(BaseModel):
 
 class ChatResponse(BaseModel):
     answer: str
-    citations: List[Citation] = []
+    citations: List["Citation"] = []
 
 
-# --------------------------------------------------------------------------- #
-# Internal embedding
-# --------------------------------------------------------------------------- #
+# RAG output
+
+class SourceCitation(BaseModel):
+    video_id: str
+    source: str          # "youtube" | "instagram"
+    chunk_id: str
+    title: str
+    evidence: str        # excerpt from the matched chunk
+    score: float
+
+
+class RAGResponse(BaseModel):
+    answer: str
+    sources: List[SourceCitation]
+    session_id: str
+
+
+# /chat legacy citation shape (used by streaming stub in routes.py)
+
+class Citation(BaseModel):
+    source: str
+    title: Optional[str] = None
+    excerpt: str
+    relevance_score: float
+
+
+# Internal
 
 class EmbeddedChunk(BaseModel):
     text: str
