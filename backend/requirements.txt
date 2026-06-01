@@ -19,11 +19,11 @@ sentence-transformers==3.0.0
 #   torch==2.3.1+cu121 --index-url https://download.pytorch.org/whl/cu121
 
 # Vector DB
-chromadb==0.5.0
+chromadb==0.5.3
 
 # YouTube extraction
-youtube-transcript-api==0.6.2
+youtube-transcript-api>=1.0.0,<2.0.0
 yt-dlp==2024.5.27
 
 # Instagram extraction
-apify-client==1.7.1
+apify-client>=1.7.1,<2.0.0

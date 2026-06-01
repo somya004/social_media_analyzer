@@ -13,6 +13,7 @@ class Settings(BaseSettings):
 
     # Optional with sensible defaults
     chroma_persist_dir: str = "./chroma_db"
+    chroma_collection_name: str = "media_chunks"
     embedding_model: str = "BAAI/bge-small-en-v1.5"
     gemini_model: str = "gemini-1.5-flash"
 
