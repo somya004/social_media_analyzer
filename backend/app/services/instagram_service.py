@@ -1,8 +1,14 @@
 import re
 from dataclasses import dataclass
 from typing import Optional
+
 from apify_client import ApifyClient
-from apify_client.errors import ApifyApiError
+
+try:
+    from apify_client.errors import ApifyApiError
+except ModuleNotFoundError:
+    ApifyApiError = Exception
+
 from app.core.config import get_settings
 from app.utils.logging import get_logger
 
@@ -15,9 +21,7 @@ _ACTOR_ID = "apify/instagram-scraper"
 _SHORTCODE_RE = re.compile(r"instagram\.com/(?:reel|p)/([A-Za-z0-9_-]+)")
 
 
-# --------------------------------------------------------------------------- #
 # Exceptions
-# --------------------------------------------------------------------------- #
 
 class InstagramExtractionError(Exception):
     """Base for all Instagram service failures."""
@@ -39,9 +43,7 @@ class RateLimitError(InstagramExtractionError):
     """Apify or Instagram rate limit was hit."""
 
 
-# --------------------------------------------------------------------------- #
 # Return types
-# --------------------------------------------------------------------------- #
 
 @dataclass
 class ReelMetadata:
@@ -67,9 +69,7 @@ class ReelData:
     caption: str               # primary text content, used downstream as "transcript"
 
 
-# --------------------------------------------------------------------------- #
 # Service
-# --------------------------------------------------------------------------- #
 
 class InstagramService:
 
@@ -104,10 +104,8 @@ class InstagramService:
 
         return ReelData(metadata=metadata, caption=metadata.caption)
 
-    # ---------------------------------------------------------------------- #
-    # Private helpers
-    # ---------------------------------------------------------------------- #
-
+     # Private helpers
+    
     def _run_actor(self, url: str) -> dict:
         client = ApifyClient(self._settings.apify_api_token)
 

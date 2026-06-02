@@ -31,9 +31,7 @@ from app.services.instagram_service import (
 DEFAULT_URL = "https://www.instagram.com/reel/DYOsGMXxlwj/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ=="
 
 
-# --------------------------------------------------------------------------- #
 # Helpers
-# --------------------------------------------------------------------------- #
 
 def section(title: str) -> None:
     print(f"\n{'─' * 60}")
@@ -48,9 +46,7 @@ def check(label: str, condition: bool) -> None:
         raise AssertionError(f"Check failed: {label}")
 
 
-# --------------------------------------------------------------------------- #
 # Error-case tests — no network, no Apify token needed
-# --------------------------------------------------------------------------- #
 
 def run_error_cases() -> None:
     service = InstagramService()
@@ -141,9 +137,7 @@ def run_error_cases() -> None:
     print("\nAll error cases passed.\n")
 
 
-# --------------------------------------------------------------------------- #
 # Full extraction test — requires network and a valid APIFY_API_TOKEN
-# --------------------------------------------------------------------------- #
 
 def run_extraction(url: str) -> None:
     service = InstagramService()
@@ -209,9 +203,7 @@ def run_extraction(url: str) -> None:
     print("\nAll checks passed.\n")
 
 
-# --------------------------------------------------------------------------- #
 # Entry point
-# --------------------------------------------------------------------------- #
 
 def main() -> None:
     args = sys.argv[1:]

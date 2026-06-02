@@ -26,9 +26,7 @@ _YDL_OPTS = {
 }
 
 
-# --------------------------------------------------------------------------- #
 # Exceptions
-# --------------------------------------------------------------------------- #
 
 class YouTubeExtractionError(Exception):
     """Base error for all YouTube service failures."""
@@ -50,9 +48,7 @@ class MetadataFetchError(YouTubeExtractionError):
     """yt-dlp could not retrieve metadata."""
 
 
-# --------------------------------------------------------------------------- #
 # Return types
-# --------------------------------------------------------------------------- #
 
 @dataclass
 class TranscriptSegment:
@@ -88,9 +84,7 @@ class VideoData:
     transcript: TranscriptData
 
 
-# --------------------------------------------------------------------------- #
 # Service
-# --------------------------------------------------------------------------- #
 
 class YouTubeService:
 
@@ -264,10 +258,8 @@ class YouTubeService:
         )
         return VideoData(metadata=metadata, transcript=transcript)
 
-    # ---------------------------------------------------------------------- #
-    # Private helpers
-    # ---------------------------------------------------------------------- #
-
+     # Private helpers
+    
     def _pick_transcript(self, transcript_list, video_id: str):
         """
         Return the best available transcript in preference order:

@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     chroma_persist_dir: str = "./chroma_db"
     chroma_collection_name: str = "media_chunks"
     embedding_model: str = "BAAI/bge-small-en-v1.5"
-    gemini_model: str = "gemini-1.5-flash"
+    gemini_model: str = "gemini-2.0-flash"
 
     cors_origins: List[str] = ["http://localhost:3000"]
     log_level: str = "INFO"

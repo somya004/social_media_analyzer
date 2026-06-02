@@ -234,9 +234,7 @@ def test_vector_store(all_chunks: list[TextChunk]) -> None:
           ))
 
 
-# --------------------------------------------------------------------------- #
 # Entry point
-# --------------------------------------------------------------------------- #
 
 def main() -> None:
     print("\nVector store integration test")

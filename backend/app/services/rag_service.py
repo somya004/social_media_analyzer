@@ -106,14 +106,12 @@ class RAGService:
             "session_id": session_id,
         }
 
-    # ---------------------------------------------------------------------- #
-
     def _get_model(self) -> ChatGoogleGenerativeAI:
         return ChatGoogleGenerativeAI(
             model=self._settings.gemini_model,
             google_api_key=self._settings.gemini_api_key,
         )
-
+        
     @staticmethod
     def _build_context_block(chunks: list[dict]) -> str:
         parts = []

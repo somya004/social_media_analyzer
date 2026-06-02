@@ -153,3 +153,258 @@ class EmbeddedChunk(BaseModel):
     embedding: List[float]
     source: str
     metadata: dict[str, Any] = {}
+from pydantic import BaseModel, field_validator
+from typing import Optional, List, Any
+
+
+# YouTube extraction output
+
+class TranscriptSegmentSchema(BaseModel):
+    text: str
+    start: float
+    duration: float
+
+
+class TranscriptSchema(BaseModel):
+    full_text: str
+    segments: List[TranscriptSegmentSchema]
+    language: str
+
+
+class YouTubeMetadataSchema(BaseModel):
+    video_id: str
+    title: str
+    creator: str
+    upload_date: str
+    duration: int
+    views: int
+    likes: Optional[int]
+    description: str
+    hashtags: List[str]
+    thumbnail_url: str
+
+
+class YouTubeVideoSchema(BaseModel):
+    metadata: YouTubeMetadataSchema
+    transcript: TranscriptSchema
+
+
+# Instagram extraction output
+
+class InstagramMetadataSchema(BaseModel):
+    shortcode: str
+    reel_url: str
+    creator_username: str
+    creator_full_name: str
+    followers: Optional[int]
+    caption: str
+    hashtags: List[str]
+    upload_date: str
+    views: Optional[int]
+    likes: Optional[int]
+    comments: Optional[int]
+    duration: Optional[int]
+    thumbnail_url: str
+    engagement_rate: Optional[float]
+
+
+class InstagramReelSchema(BaseModel):
+    metadata: InstagramMetadataSchema
+    caption: str
+
+
+# Shared summary shape returned in analysis responses
+
+class VideoMetadata(BaseModel):
+    title: Optional[str] = None
+    creator: Optional[str] = None
+    views: Optional[int] = None
+    likes: Optional[int] = None
+    comments: Optional[int] = None
+    followers: Optional[int] = None
+    hashtags: List[str] = []
+    duration: Optional[int] = None
+    upload_date: Optional[str] = None
+    engagement_rate: Optional[float] = None
+    thumbnail_url: Optional[str] = None
+
+
+# POST /analyze/youtube
+class AnalyzeYouTubeRequest(BaseModel):
+    url: str
+    video_id: str = "A"
+
+    @field_validator("url")
+    @classmethod
+    def must_be_youtube(cls, v: str) -> str:
+        v = v.strip()
+        if "youtube.com" not in v and "youtu.be" not in v:
+            raise ValueError("url does not look like a YouTube URL")
+        return v
+
+    @field_validator("video_id")
+    @classmethod
+    def video_id_not_empty(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("video_id cannot be empty")
+        return v.strip()
+
+
+class AnalyzeYouTubeResponse(BaseModel):
+    video_id: str
+    source: str
+    title: Optional[str]
+    creator: Optional[str]
+    upload_date: Optional[str]
+    duration: Optional[int]
+    views: Optional[int]
+    likes: Optional[int]
+    hashtags: List[str]
+    thumbnail_url: Optional[str]
+    transcript_chars: int
+    chunks_stored: int
+    transcript_available: bool
+
+
+# POST /analyze/instagram
+
+class AnalyzeInstagramRequest(BaseModel):
+    url: str
+    video_id: str = "B"
+
+    @field_validator("url")
+    @classmethod
+    def must_be_instagram(cls, v: str) -> str:
+        v = v.strip()
+        if "instagram.com" not in v:
+            raise ValueError("url does not look like an Instagram URL")
+        return v
+
+    @field_validator("video_id")
+    @classmethod
+    def video_id_not_empty(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("video_id cannot be empty")
+        return v.strip()
+
+
+class AnalyzeInstagramResponse(BaseModel):
+    video_id: str
+    source: str
+    shortcode: Optional[str]
+    creator: Optional[str]
+    creator_full_name: Optional[str]
+    followers: Optional[int]
+    upload_date: Optional[str]
+    duration: Optional[int]
+    views: Optional[int]
+    likes: Optional[int]
+    comments: Optional[int]
+    engagement_rate: Optional[float]
+    hashtags: List[str]
+    thumbnail_url: Optional[str]
+    caption_chars: int
+    chunks_stored: int
+    caption_available: bool
+
+
+# POST /analyze/pair
+
+class AnalyzePairRequest(BaseModel):
+    youtube_url: str
+    instagram_url: str
+
+    @field_validator("youtube_url")
+    @classmethod
+    def must_be_youtube(cls, v: str) -> str:
+        v = v.strip()
+        if "youtube.com" not in v and "youtu.be" not in v:
+            raise ValueError("youtube_url does not look like a YouTube URL")
+        return v
+
+    @field_validator("instagram_url")
+    @classmethod
+    def must_be_instagram(cls, v: str) -> str:
+        v = v.strip()
+        if "instagram.com" not in v:
+            raise ValueError("instagram_url does not look like an Instagram URL")
+        return v
+
+
+class AnalyzePairResponse(BaseModel):
+    youtube: AnalyzeYouTubeResponse
+    instagram: AnalyzeInstagramResponse
+
+
+# POST /chat
+
+class ChatRequest(BaseModel):
+    question: str
+    session_id: Optional[str] = None
+    filters: Optional[dict] = None
+
+    @field_validator("question")
+    @classmethod
+    def question_not_empty(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("question cannot be empty")
+        return v.strip()
+
+
+class SourceCitation(BaseModel):
+    video_id: str
+    source: str
+    chunk_id: str
+    title: str
+    evidence: str
+    score: float
+
+
+class ChatResponse(BaseModel):
+    answer: str
+    sources: List[SourceCitation]
+    session_id: str
+
+
+# RAG output (used internally and in test_rag.py)
+
+class RAGResponse(BaseModel):
+    answer: str
+    sources: List[SourceCitation]
+    session_id: str
+
+
+# Legacy — kept so existing tests that import these names don't break
+
+class AnalyzeRequest(BaseModel):
+    youtube_url: str
+    instagram_url: str
+
+
+class AnalyzeResponse(BaseModel):
+    session_id: str
+    youtube: VideoMetadata
+    instagram: VideoMetadata
+
+
+class Citation(BaseModel):
+    source: str
+    title: Optional[str] = None
+    excerpt: str
+    relevance_score: float
+
+
+# Internal
+
+class VideoInput(BaseModel):
+    source: str
+    url: str
+    transcript: str
+    metadata: VideoMetadata
+
+
+class EmbeddedChunk(BaseModel):
+    text: str
+    embedding: List[float]
+    source: str
+    metadata: dict[str, Any] = {}
