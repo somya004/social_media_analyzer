@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from app.models.schemas import (
     AnalyzeYouTubeRequest,
     AnalyzeYouTubeResponse,
@@ -18,8 +19,6 @@ router = APIRouter()
 settings = get_settings()
 logger = get_logger(__name__, level=settings.log_level)
 
-# One instance per worker process — services are stateless except for
-# MemoryService inside RAGService, which is intentionally in-process.
 _analysis = AnalysisService()
 _rag = RAGService()
 
@@ -38,7 +37,7 @@ def health():
 
 
 # Analysis
- 
+
 @router.post("/analyze/youtube", response_model=AnalyzeYouTubeResponse)
 async def analyze_youtube(payload: AnalyzeYouTubeRequest):
     logger.info("POST /analyze/youtube  url=%s  video_id=%s", payload.url, payload.video_id)
@@ -71,8 +70,7 @@ async def analyze_pair(payload: AnalyzePairRequest):
         raise HTTPException(status_code=exc.status_code, detail=str(exc))
     return result
 
-
-# Chat
+# Chat — non-streaming (unchanged)
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(payload: ChatRequest):
@@ -92,3 +90,35 @@ async def chat(payload: ChatRequest):
         logger.exception("RAG failure  session=%s", payload.session_id)
         raise HTTPException(status_code=500, detail=f"Chat failed: {exc}")
     return result
+
+
+# Chat — streaming SSE
+
+@router.post("/chat/stream")
+async def chat_stream(payload: ChatRequest):
+    logger.info(
+        "POST /chat/stream  session=%s  question=%.80s",
+        payload.session_id, payload.question,
+    )
+
+    async def event_generator():
+        try:
+            async for event in _rag.stream_answer(
+                question=payload.question,
+                session_id=payload.session_id,
+                filters=payload.filters,
+            ):
+                yield event
+        except Exception as exc:
+            import json as _json
+            logger.exception("stream generator error  session=%s", payload.session_id)
+            yield f"event: error\ndata: {_json.dumps({'message': str(exc)})}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",   # disables nginx proxy buffering
+        },
+    )
