@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  background: #080810;
+  color: #e4e4e7;
+  font-family: Inter, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #0f0f1a; }
+::-webkit-scrollbar-thumb { background: #2a2a40; border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a55; }
+
+/* Glass card base */
+.glass {
+  background: rgba(255,255,255,0.04);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Lift on hover */
+.card-hover {
+  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease;
+}
+.card-hover:hover {
+  transform: translateY(-3px) scale(1.01);
+}
+
+/* Button spring press */
+.btn-spring {
+  transition: transform 0.15s cubic-bezier(0.34,1.56,0.64,1), opacity 0.15s ease;
+}
+.btn-spring:hover:not(:disabled) { transform: translateY(-1px) scale(1.03); }
+.btn-spring:active:not(:disabled) { transform: scale(0.96); }
+
+/* YouTube gradient */
+.yt-gradient {
+  background: linear-gradient(135deg, rgba(255,68,68,0.15) 0%, rgba(255,68,68,0.03) 100%);
+  border-color: rgba(255,68,68,0.25);
+}
+.yt-glow:hover { box-shadow: 0 0 24px rgba(255,68,68,0.15); }
+
+/* Instagram gradient */
+.ig-gradient {
+  background: linear-gradient(135deg, rgba(192,38,211,0.15) 0%, rgba(192,38,211,0.03) 100%);
+  border-color: rgba(192,38,211,0.25);
+}
+.ig-glow:hover { box-shadow: 0 0 24px rgba(192,38,211,0.15); }
+
+/* Chat gradient */
+.chat-gradient {
+  background: linear-gradient(135deg, rgba(99,102,241,0.12) 0%, rgba(99,102,241,0.02) 100%);
+  border-color: rgba(99,102,241,0.2);
+}
+
+/* Shimmer loading skeleton */
+.shimmer-bg {
+  background: linear-gradient(90deg, #1a1a2e 25%, #252540 50%, #1a1a2e 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s linear infinite;
+}
+
+/* Gradient text */
+.text-yt { background: linear-gradient(135deg, #ff6b6b, #ff4444); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.text-ig { background: linear-gradient(135deg, #e879f9, #c026d3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.text-chat { background: linear-gradient(135deg, #818cf8, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+
+/* Dot pattern background */
+.dot-bg {
+  background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+  background-size: 28px 28px;
+}

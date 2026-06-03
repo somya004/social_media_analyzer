@@ -23,6 +23,8 @@ _YDL_OPTS = {
     "no_warnings": True,
     "skip_download": True,
     "extract_flat": False,
+    "format": "best",
+    "ignore_no_formats_error": True,
 }
 
 
